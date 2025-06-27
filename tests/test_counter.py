@@ -9,21 +9,21 @@ async def test_counter_initial_state(user: User) -> None:
     labels = list(user.find(ui.label).elements)
     assert len(labels) >= 2  # Title and counter display
     
-    # Find the title label
-    title_labels = [elem for elem in labels if 'Simple Counter' in elem.text]
+    # Find the title label with pink theme
+    title_labels = [elem for elem in labels if 'Pink Counter' in elem.text]
     assert len(title_labels) == 1
 
 async def test_counter_ui_structure(user: User) -> None:
     """Test that all required UI elements are present"""
     await user.open('/')
     
-    # Check title label exists
-    title_labels = [elem for elem in user.find(ui.label).elements if 'Simple Counter' in elem.text]
+    # Check title label exists with pink theme
+    title_labels = [elem for elem in user.find(ui.label).elements if 'Pink Counter' in elem.text]
     assert len(title_labels) == 1
     
-    # Check that we have labels (title + counter display)
+    # Check that we have labels (title + counter display + description)
     labels = list(user.find(ui.label).elements)
-    assert len(labels) >= 2
+    assert len(labels) >= 3
     
     # Check buttons exist
     buttons = list(user.find(ui.button).elements)
@@ -57,6 +57,11 @@ async def test_counter_page_loads(user: User) -> None:
     # Verify page loaded by checking for key elements
     assert len(list(user.find(ui.label).elements)) > 0
     assert len(list(user.find(ui.button).elements)) > 0
+    
+    # Check for pink-themed elements
+    labels = list(user.find(ui.label).elements)
+    pink_title = any('Pink Counter' in label.text for label in labels)
+    assert pink_title
 
 async def test_counter_functional(user: User) -> None:
     """Test counter functionality by directly manipulating storage"""
@@ -71,3 +76,23 @@ async def test_counter_functional(user: User) -> None:
     # Reset to 0
     app.storage.user['counter_value'] = 0
     assert app.storage.user['counter_value'] == 0
+
+async def test_pink_theme_elements(user: User) -> None:
+    """Test that pink theme elements are present"""
+    await user.open('/')
+    
+    # Check for pink-themed title
+    labels = list(user.find(ui.label).elements)
+    title_with_hearts = any('💖' in label.text and 'Pink Counter' in label.text for label in labels)
+    assert title_with_hearts
+    
+    # Check for descriptive text
+    descriptive_text = any('Click the button to increment' in label.text for label in labels)
+    assert descriptive_text
+    
+    # Check for themed button text
+    buttons = list(user.find(ui.button).elements)
+    sparkle_increment = any('✨' in btn.text and 'Increment' in btn.text for btn in buttons)
+    refresh_reset = any('🔄' in btn.text and 'Reset' in btn.text for btn in buttons)
+    assert sparkle_increment
+    assert refresh_reset
